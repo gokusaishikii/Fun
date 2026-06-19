@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiyu Zhao — UX Designer</title>
+    <link href="https://fonts.cdnfonts.com/css/barlow" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/barlow-semi-condensed" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/jetbrains-mono-2" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #efece2;
+            --paper-2: #f8f6ef;
+            --card: #fbfaf5;
+            --ink: #0b0b0b;
+            --blue: #1c45d6;
+            --blue-deep: #12309a;
+            --yellow: #f4c400;
+            --red: #d9281c;
+            --muted: #6f6c63;
+            --line: #0b0b0b;
+            --hair: rgba(11, 11, 11, 0.16);
+            --hair-2: rgba(11, 11, 11, 0.30);
+            --mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+            --sans: 'Barlow', system-ui, sans-serif;
+            --cond: 'Barlow Semi Condensed', 'Barlow', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: var(--sans);
+            color: var(--ink);
+            background: var(--paper);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            background-image:
+                linear-gradient(var(--hair) 1px, transparent 1px),
+                linear-gradient(90deg, var(--hair) 1px, transparent 1px);
+            background-size: 26px 26px;
+            background-position: -1px -1px;
+        }
+
+        ::selection { background: var(--yellow); color: var(--ink); }
+
+        a { color: inherit; text-decoration: none; }
+
+        .mono { font-family: var(--mono); }
+
+        .wrap { width: min(calc(100% - 28px), 1200px); margin: 0 auto; }
+
+        /* ---- crop marks at page corners ---- */
+        .cropmark { position: fixed; width: 18px; height: 18px; z-index: 900; pointer-events: none; }
+        .cropmark::before, .cropmark::after { content: ''; position: absolute; background: var(--ink); }
+        .cropmark::before { width: 18px; height: 1.5px; }
+        .cropmark::after { width: 1.5px; height: 18px; }
+        .cropmark.tl { top: 12px; left: 12px; }
+        .cropmark.tr { top: 12px; right: 12px; }
+        .cropmark.tr::before { right: 0; } .cropmark.tr::after { right: 0; }
+        .cropmark.bl { bottom: 12px; left: 12px; }
+        .cropmark.bl::before { bottom: 0; } .cropmark.bl::after { bottom: 0; }
+        .cropmark.br { bottom: 12px; right: 12px; }
+        .cropmark.br::before { right: 0; bottom: 0; } .cropmark.br::after { right: 0; bottom: 0; }
+
+        /* ---- nav ---- */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(239, 236, 226, 0.92);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1.5px solid var(--line);
+            transition: transform .45s cubic-bezier(.16,.84,.44,1);
+        }
+        nav.hidden { transform: translateY(-101%); }
+        .nav-box { display: flex; justify-content: space-between; align-items: stretch; height: 46px; }
+        .brand { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
+        .brand-mark {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; background: var(--ink); color: var(--paper);
+            font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .04em;
+        }
+        .brand-name { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+        .nav-right { display: flex; align-items: stretch; }
+        .nav-right a {
+            display: flex; align-items: center; padding: 0 16px;
+            font-family: var(--mono); font-size: 11px; font-weight: 700;
+            letter-spacing: .14em; text-transform: uppercase;
+            border-left: 1.5px solid var(--line); transition: background .18s, color .18s;
+        }
+        .nav-right a:hover { background: var(--ink); color: var(--paper); }
+        .nav-right a.active { background: var(--yellow); }
+        .nav-right a.active:hover { background: var(--ink); color: var(--yellow); }
+
+        /* ---- shared module frame ---- */
+        .module { border: 1.5px solid var(--line); background: var(--card); }
+        .barline {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 7px 12px;
+            font-family: var(--mono); font-size: 11px; font-weight: 700;
+            letter-spacing: .08em; text-transform: uppercase;
+        }
+        .barline.dark { background: var(--ink); color: var(--paper); }
+        .perf {
+            height: 0; border-top: 1.5px dashed var(--hair-2);
+        }
+
+        /* ---- hero ---- */
+        main { padding-top: 46px; }
+        .hero { padding: 30px 0 22px; }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+            gap: 16px;
+        }
+
+        /* keepsake tag (left) */
+        .tag { background: var(--ink); color: var(--paper); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .tag-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1.5px solid rgba(255,255,255,.22); font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; }
+        .tag-pictos { display: grid; grid-template-columns: 1fr 1fr; }
+        .tag-pictos .pic { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; border-bottom: 1.5px solid rgba(255,255,255,.22); }
+        .tag-pictos .pic:nth-child(odd) { border-right: 1.5px solid rgba(255,255,255,.22); }
+        .pic svg { width: 58%; height: 58%; }
+        .pic.warn { background: var(--yellow); }
+        .pic.warn svg { fill: var(--ink); stroke: var(--ink); }
+        .pic svg { fill: var(--paper); stroke: var(--paper); }
+        .tag-redblock {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 14px; background: var(--red); color: #fff;
+        }
+        .tag-redblock .han { font-size: 40px; font-weight: 700; line-height: 1; font-family: var(--sans); }
+        .tag-redblock .stack { font-family: var(--mono); font-size: 10px; line-height: 1.5; letter-spacing: .1em; }
+        .tag-dims {
+            flex: 1; display: flex; align-items: flex-end; justify-content: space-between;
+            padding: 12px; font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: .08em;
+        }
+        .tag-barcode {
+            height: 38px; margin: 0 12px 12px; border: 1px solid rgba(255,255,255,.4);
+            background-image: repeating-linear-gradient(90deg, #fff 0 2px, transparent 2px 4px, #fff 4px 5px, transparent 5px 9px, #fff 9px 12px, transparent 12px 14px);
+            background-position: 6px 0; background-repeat: no-repeat; background-size: calc(100% - 12px) 100%;
+        }
+
+        /* spec sheet (right) */
+        .sheet { display: grid; grid-template-rows: auto 1fr auto auto auto; }
+        .sheet-top { display: grid; grid-template-columns: 1.3fr 1fr 1fr; }
+        .sheet-top span { padding: 8px 12px; border-right: 1.5px solid var(--line); font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+        .sheet-top span:last-child { border-right: 0; text-align: right; }
+        .sheet-top { border-bottom: 1.5px solid var(--line); }
+
+        .sheet-title { padding: clamp(22px, 3vw, 38px) clamp(22px, 3vw, 38px) clamp(18px, 2.4vw, 30px); }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+        .eyebrow .dot { width: 7px; height: 7px; background: var(--red); }
+        .sheet-title h1 { font-family: var(--cond); font-weight: 600; line-height: .96; letter-spacing: -.01em; }
+        .sheet-title h1 .name {
+            display: inline-block; margin-bottom: 12px; padding: 2px 12px 7px;
+            background: var(--yellow); font-size: clamp(26px, 3.4vw, 40px);
+        }
+        .sheet-title h1 .claim { display: block; font-size: clamp(40px, 6vw, 78px); color: var(--ink); }
+        .sheet-statement { max-width: 560px; margin-top: 20px; font-size: 16px; line-height: 1.6; color: #2b2a26; font-weight: 500; }
+
+        .sheet-meta { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5px solid var(--line); }
+        .sheet-meta div { padding: 12px 14px; border-right: 1.5px solid var(--line); }
+        .sheet-meta div:last-child { border-right: 0; }
+        .sheet-meta .k { display: block; margin-bottom: 7px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+        .sheet-meta .v { display: block; font-family: var(--cond); font-size: 18px; font-weight: 600; line-height: 1.15; }
+
+        .hazard-strip { display: flex; align-items: stretch; border-top: 1.5px solid var(--line); background: var(--paper-2); }
+        .hazard-strip .pic { width: 54px; flex: none; display: flex; align-items: center; justify-content: center; border-right: 1.5px solid var(--line); }
+        .hazard-strip .pic svg { width: 26px; height: 26px; fill: var(--ink); stroke: var(--ink); }
+        .hazard-strip .pic.y { background: var(--yellow); }
+        .hazard-strip .pic.b { background: var(--blue); }
+        .hazard-strip .pic.b svg { fill: #fff; stroke: #fff; }
+        .hazard-cap { flex: 1; display: flex; align-items: center; padding: 0 14px; font-family: var(--mono); font-size: 10.5px; line-height: 1.5; letter-spacing: .04em; color: #2b2a26; }
+
+        .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid var(--line); }
+        .sheet-actions a { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px; font-family: var(--mono); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; border-right: 1.5px solid var(--line); transition: background .18s, color .18s; }
+        .sheet-actions a:last-child { border-right: 0; }
+        .sheet-actions a:hover { background: var(--blue); color: #fff; }
+        .sheet-actions a .g { font-size: 18px; }
+
+        /* ---- work ledger ---- */
+        .ledger { padding: 8px 0 30px; }
+        .ledger-rule { height: 1.5px; background: var(--line); }
+        .ledger-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 420px); gap: 26px; align-items: end; padding: 24px 0 18px; }
+        .section-code { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 5px 9px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+        .ledger-head h2 { font-family: var(--cond); font-size: clamp(34px, 5vw, 60px); font-weight: 600; line-height: .98; }
+        .ledger-head p { font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--muted); }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+
+        .file { background: var(--card); display: grid; grid-template-rows: auto auto 1fr auto; transition: background .2s; }
+        .file .barline { border-bottom: 1.5px solid var(--line); }
+        .file .accent { background: var(--ink); color: var(--paper); }
+        .file.b .accent { background: var(--blue); }
+        .file.c .accent { background: var(--yellow); color: var(--ink); }
+        .file.d .accent { background: var(--ink); color: var(--paper); }
+        .file-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 200px); gap: 18px; padding: 20px; align-items: center; }
+        .file-body.stacked { grid-template-columns: 1fr; }
+        .file h3 { font-family: var(--cond); font-size: clamp(34px, 4.2vw, 52px); font-weight: 600; line-height: .95; word-break: break-word; }
+        .file .desc { margin-top: 12px; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; color: #2b2a26; max-width: 360px; }
+        .file-thumb {
+            aspect-ratio: 4 / 3; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+            background-image: linear-gradient(var(--hair) 1px, transparent 1px), linear-gradient(90deg, var(--hair) 1px, transparent 1px);
+            background-size: 18px 18px; background-color: var(--paper-2);
+        }
+        .file-thumb img { max-width: 76%; max-height: 76%; object-fit: contain; }
+        .file-thumb .corner-pic { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+        .file-thumb .corner-pic svg { width: 22px; height: 22px; fill: var(--ink); stroke: var(--ink); opacity: .85; }
+        .file .foot { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; border-top: 1.5px solid var(--line); font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+        .file .foot .open { display: inline-flex; align-items: center; gap: 6px; }
+        .file:hover { background: var(--paper-2); }
+        .file:hover .foot .open { color: var(--blue); }
+        .file.locked:hover .foot .open { color: var(--red); }
+
+        /* ---- footer ---- */
+        footer { padding: 8px 0 40px; }
+        .foot-caution { display: flex; align-items: center; gap: 12px; padding: 8px 0; overflow: hidden; }
+        .foot-caution .han { font-size: 16px; color: var(--red); font-weight: 700; }
+        .foot-caution .run { flex: 1; white-space: nowrap; overflow: hidden; font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+        .foot-grid { display: grid; grid-template-columns: minmax(0, 1fr) 180px 220px; gap: 26px; padding: 26px; background: var(--ink); color: var(--paper); border: 1.5px solid var(--line); }
+        .foot-grid h2 { font-family: var(--cond); font-size: clamp(30px, 4vw, 50px); font-weight: 600; line-height: 1; margin-bottom: 4px; }
+        .foot-grid .section-code { background: var(--paper); color: var(--ink); }
+        .foot-mail { display: inline-block; margin-top: 14px; font-family: var(--mono); font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+        .foot-mail:hover { color: var(--yellow); }
+        .foot-links { display: flex; flex-direction: column; gap: 10px; }
+        .foot-links a { font-family: var(--mono); font-size: 13px; font-weight: 700; width: max-content; text-decoration: underline; text-underline-offset: 3px; }
+        .foot-links a:hover { color: var(--yellow); }
+        .foot-serial { display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: .06em; }
+        .foot-serial .barmini { height: 26px; margin-bottom: 12px; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.85) 0 2px, transparent 2px 4px, rgba(255,255,255,.85) 4px 5px, transparent 5px 9px); }
+
+        /* ---- entrance ---- */
+        .rise { opacity: 0; transform: translateY(14px); }
+        .rise.in { opacity: 1; transform: none; transition: opacity .6s cubic-bezier(.16,.84,.44,1), transform .6s cubic-bezier(.16,.84,.44,1); }
+
+        @media (max-width: 900px) {
+            .hero-grid, .sheet-top, .ledger-head, .grid-2, .foot-grid { grid-template-columns: 1fr; }
+            .tag { min-height: 320px; }
+            .tag-dims { padding-top: 40px; }
+            .sheet-top span { border-right: 0; border-bottom: 1.5px solid var(--line); text-align: left; }
+            .sheet-top span:last-child { border-bottom: 0; text-align: left; }
+            .foot-serial { text-align: left; }
+            .file-body { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            body { background-size: 20px 20px; }
+            .sheet-meta { grid-template-columns: 1fr; }
+            .sheet-meta div { border-right: 0; border-bottom: 1.5px solid var(--line); }
+            .sheet-meta div:last-child { border-bottom: 0; }
+            .sheet-actions { grid-template-columns: 1fr; }
+            .sheet-actions a { border-right: 0; border-bottom: 1.5px solid var(--line); }
+            .sheet-actions a:last-child { border-bottom: 0; }
+            .brand-name { display: none; }
+            .nav-right a { padding: 0 11px; font-size: 10px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .rise { opacity: 1; transform: none; transition: none; }
+            nav { transition: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <span class="cropmark tl" aria-hidden="true"></span>
+    <span class="cropmark tr" aria-hidden="true"></span>
+    <span class="cropmark bl" aria-hidden="true"></span>
+    <span class="cropmark br" aria-hidden="true"></span>
+
+    <!-- icon defs -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <symbol id="i-eye" viewBox="0 0 32 32">
+                <path d="M2 16C6 9 11 6 16 6s10 3 14 10c-4 7-9 10-14 10S6 23 2 16Z" fill="none" stroke-width="2"/>
+                <circle cx="16" cy="16" r="4.5" stroke="none"/>
+            </symbol>
+            <symbol id="i-hand" viewBox="0 0 32 32">
+                <path d="M11 16V7.5a2 2 0 0 1 4 0V15m0-1V6a2 2 0 0 1 4 0v9m0-1V8a2 2 0 0 1 4 0v10c0 5-3 8-8 8-3 0-5-1-6.5-3.5L6 18a2 2 0 0 1 3-2.5l2 2.5" fill="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+            </symbol>
+            <symbol id="i-tri" viewBox="0 0 32 32">
+                <path d="M16 4 30 28H2L16 4Z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+                <rect x="14.7" y="12" width="2.6" height="8" stroke="none"/>
+                <rect x="14.7" y="22" width="2.6" height="2.6" stroke="none"/>
+            </symbol>
+            <symbol id="i-temp" viewBox="0 0 32 32">
+                <path d="M13 18V7a3 3 0 0 1 6 0v11a5 5 0 1 1-6 0Z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="16" cy="22" r="2.4" stroke="none"/>
+            </symbol>
+            <symbol id="i-grid" viewBox="0 0 32 32">
+                <rect x="5" y="5" width="22" height="22" fill="none" stroke-width="2"/>
+                <path d="M5 12.3h22M5 19.6h22M12.3 5v22M19.6 5v22" stroke-width="1.4"/>
+            </symbol>
+            <symbol id="i-recycle" viewBox="0 0 32 32">
+                <path d="M16 6l4 7h-8l4-7Zm7.5 4l4 7-8 .2 4-7.2Zm-15 0l4 7.2-8-.2 4-7Z" fill="none" stroke-width="1.7" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-cursor" viewBox="0 0 32 32">
+                <path d="M8 5l16 9-7 1.5L21 25l-3 1.5L14 18l-6 4V5Z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+            </symbol>
+            <symbol id="i-flow" viewBox="0 0 32 32">
+                <rect x="4" y="5" width="9" height="7" fill="none" stroke-width="2"/>
+                <rect x="19" y="20" width="9" height="7" fill="none" stroke-width="2"/>
+                <path d="M13 8.5h6a4 4 0 0 1 4 4V20" fill="none" stroke-width="2"/>
+            </symbol>
+            <symbol id="i-coin" viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="11" fill="none" stroke-width="2"/>
+                <path d="M16 9v14M12.5 12.5h5a2.5 2.5 0 0 1 0 5h-5m0 0h5.5" fill="none" stroke-width="1.8" stroke-linecap="round"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <nav id="navbar">
+        <div class="wrap nav-box">
+            <a href="index.html" class="brand" aria-label="Shiyu Zhao — home">
+                <span class="brand-mark">SZ</span>
+                <span class="brand-name">Shiyu / Design</span>
+            </a>
+            <div class="nav-right">
+                <a href="index.html" class="active">Work</a>
+                <a href="document/CV.pdf">Resume</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero wrap" aria-labelledby="intro-title">
+            <div class="hero-grid">
+                <!-- keepsake tag -->
+                <aside class="tag module rise" aria-hidden="true">
+                    <div class="tag-head">
+                        <span>LENS LAB / SZ</span>
+                        <span>NO.07</span>
+                    </div>
+                    <div class="tag-pictos">
+                        <div class="pic"><svg><use href="#i-eye"/></svg></div>
+                        <div class="pic warn"><svg><use href="#i-tri"/></svg></div>
+                        <div class="pic"><svg><use href="#i-hand"/></svg></div>
+                        <div class="pic warn"><svg><use href="#i-temp"/></svg></div>
+                    </div>
+                    <div class="tag-redblock">
+                        <span class="han">赤</span>
+                        <span class="stack">CAUTION<br>注意 / 设计样品<br>HANDLE WITH CARE</span>
+                    </div>
+                    <div class="tag-dims">
+                        <span>SIZE<br>UX · PRODUCT</span>
+                        <span>2026<br>VOL.01</span>
+                    </div>
+                    <div class="tag-barcode"></div>
+                </aside>
+
+                <!-- spec sheet -->
+                <div class="sheet module">
+                    <div class="sheet-top">
+                        <span>UX Designer</span>
+                        <span>2026 / Selected</span>
+                        <span>ID 2017818829</span>
+                    </div>
+
+                    <div class="sheet-title">
+                        <span class="eyebrow"><span class="dot"></span>Specimen — Designer Keepsake</span>
+                        <h1 id="intro-title">
+                            <span class="name">Shiyu Zhao</span>
+                            <span class="claim">Clean systems<br>for complex tools.</span>
+                        </h1>
+                        <p class="sheet-statement">
+                            I design enterprise tools, AI workflows, and consumer products with a bias toward
+                            legible structure, crisp interaction, and visual systems that feel engineered.
+                        </p>
+                    </div>
+
+                    <div class="sheet-meta">
+                        <div><span class="k">Role</span><span class="v">UX / Product Designer</span></div>
+                        <div><span class="k">Base</span><span class="v">Germany</span></div>
+                        <div><span class="k">Status</span><span class="v">Designing @ empiriecom</span></div>
+                    </div>
+
+                    <div class="hazard-strip" aria-hidden="true">
+                        <div class="pic y"><svg><use href="#i-tri"/></svg></div>
+                        <div class="pic"><svg><use href="#i-grid"/></svg></div>
+                        <div class="pic b"><svg><use href="#i-cursor"/></svg></div>
+                        <div class="hazard-cap">CAUTION · OPINIONATED SYSTEMS INSIDE · 谨慎处理 · STRUCTURE BEFORE DECORATION · KEEP LEGIBLE</div>
+                    </div>
+
+                    <div class="sheet-actions">
+                        <a href="#work" id="scrollButton"><span>View Selected Work</span><span class="g">↓</span></a>
+                        <a href="document/CV.pdf"><span>Open Resume</span><span class="g">↗</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WORK -->
+        <section class="ledger wrap" id="work" aria-labelledby="work-title">
+            <div class="ledger-rule"></div>
+            <header class="ledger-head">
+                <div>
+                    <span class="section-code">WORK / 01</span>
+                    <h2 id="work-title">Selected product files</h2>
+                </div>
+                <p>// A compact catalogue of UX projects across enterprise commerce, AI building design, travel packing, and personal finance.</p>
+            </header>
+
+            <div class="grid-2">
+                <article class="file a rise">
+                    <a href="password-empiriecom.html" aria-label="Open empiriecom case study">
+                        <div class="barline accent"><span>FILE A</span><span>2024—2026</span></div>
+                        <div class="file-body">
+                            <div>
+                                <h3>empiriecom</h3>
+                                <p class="desc">Enterprise e-commerce UX for complex internal workflows.</p>
+                            </div>
+                            <div class="file-thumb">
+                                <span class="corner-pic"><svg><use href="#i-grid"/></svg></span>
+                                <img src="image/work-empiriecom-empiriecom logo.png" alt="empiriecom project mark">
+                            </div>
+                        </div>
+                        <div class="foot"><span>UX Design · Working Student</span><span class="open">OPEN ↗</span></div>
+                    </a>
+                </article>
+
+                <article class="file b locked rise">
+                    <a href="password-xkool.html" aria-label="Open XKool case study">
+                        <div class="barline accent"><span>FILE B</span><span>SPRING 2023</span></div>
+                        <div class="file-body">
+                            <div>
+                                <h3>XKool</h3>
+                                <p class="desc">Interaction design for AI-driven architectural planning.</p>
+                            </div>
+                            <div class="file-thumb">
+                                <span class="corner-pic"><svg><use href="#i-cursor"/></svg></span>
+                                <img src="image/work-xkool-projectlogo.svg" alt="XKool project mark">
+                            </div>
+                        </div>
+                        <div class="foot"><span>Interaction Design · Intern</span><span class="open">LOCKED ↗</span></div>
+                    </a>
+                </article>
+            </div>
+
+            <div class="grid-2">
+                <article class="file c rise">
+                    <a href="work-habpack.html" aria-label="Open HabPack case study">
+                        <div class="barline accent"><span>FILE C</span><span>SUMMER 2024</span></div>
+                        <div class="file-body stacked">
+                            <div>
+                                <h3>HabPack</h3>
+                                <p class="desc">AI packing assistant for travelers who need faster, calmer preparation.</p>
+                            </div>
+                            <div class="file-thumb">
+                                <span class="corner-pic"><svg><use href="#i-flow"/></svg></span>
+                                <img src="image/work-habpack.png" alt="HabPack project preview">
+                            </div>
+                        </div>
+                        <div class="foot"><span>Academic · UI / UX</span><span class="open">OPEN ↗</span></div>
+                    </a>
+                </article>
+
+                <article class="file d rise">
+                    <a href="work-finflow.html" aria-label="Open FinFlow case study">
+                        <div class="barline accent"><span>FILE D</span><span>SUMMER 2024</span></div>
+                        <div class="file-body stacked">
+                            <div>
+                                <h3>FinFlow</h3>
+                                <p class="desc">Budgeting companion, saving planner, and financial advisor.</p>
+                            </div>
+                            <div class="file-thumb">
+                                <span class="corner-pic"><svg><use href="#i-coin"/></svg></span>
+                                <img src="image/work-finflow.png" alt="FinFlow project preview">
+                            </div>
+                        </div>
+                        <div class="foot"><span>Academic · Product Design</span><span class="open">OPEN ↗</span></div>
+                    </a>
+                </article>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="wrap">
+            <div class="foot-caution" aria-hidden="true">
+                <span class="han">赤</span>
+                <span class="run">CONTACT · 联系 · KEEP THIS AWAY FROM DULL INTERFACES · HANDLE WITH CARE · 注意 · DESIGNED IN GERMANY · CONTACT · 联系 · KEEP LEGIBLE ·</span>
+            </div>
+            <div class="foot-grid">
+                <div>
+                    <span class="section-code">CONTACT / 02</span>
+                    <h2>Got an idea?</h2>
+                    <a href="mailto:shiyu_zhao@outlook.com" class="foot-mail">shiyu_zhao@outlook.com</a>
+                </div>
+                <div class="foot-links">
+                    <a href="index.html">Work</a>
+                    <a href="document/CV.pdf">Resume</a>
+                    <a href="https://www.linkedin.com/in/shiyu-zhao-0520381b6/" target="_blank" rel="noopener">LinkedIn</a>
+                </div>
+                <div class="foot-serial">
+                    <span class="barmini"></span>
+                    <span>2017818829100<br>&copy; 2026 Shiyu Zhao</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navbar = document.getElementById('navbar');
+            let last = 0;
+            window.addEventListener('scroll', function () {
+                const y = window.pageYOffset || document.documentElement.scrollTop;
+                if (y > last && y > 90) navbar.classList.add('hidden');
+                else navbar.classList.remove('hidden');
+                last = y <= 0 ? 0 : y;
+            }, { passive: true });
+
+            const btn = document.getElementById('scrollButton');
+            if (btn) btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('work').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+            }, { threshold: 0.12 });
+            document.querySelectorAll('.rise').forEach(el => io.observe(el));
+        });
+    </script>
+</body>
+
+</html>
